@@ -45,7 +45,7 @@ void upper(const char *s, char *res)
  * Converts a string to lowercase.
  *
  * @param s Pointer to the string to be converted.
- * @param res Pointer to the resulting string. This buffer should be large enough to hold the converted string.
+ * @param res Pointer to the resulting string.
  */
 void lower(const char *s, char *res)
 {
@@ -66,7 +66,7 @@ void lower(const char *s, char *res)
  * Capitalizes the first character of a string.
  *
  * @param s Pointer to the string to be capitalized.
- * @param res Pointer to the resulting string. This buffer should be large enough to hold the capitalized string.
+ * @param res Pointer to the resulting string.
  */
 void capitalize(const char *s, char *res)
 {
@@ -88,7 +88,7 @@ void capitalize(const char *s, char *res)
  * Calculates the length of a string.
  *
  * @param s Pointer to the string.
- * @return The length of the string, excluding the terminating null byte.
+ * @return The length of the string.
  */
 int my_strlen(const char *s)
 {
@@ -103,7 +103,7 @@ int my_strlen(const char *s)
 /**
  * Concatenates the source string to the end of the destination string.
  *
- * @param dest Pointer to the destination string. Must have enough space to store the concatenated result.
+ * @param dest Pointer to the destination string.
  * @param s Pointer to the source string.
  */
 void string_concatenate(char *dest, char *s)
@@ -128,17 +128,16 @@ void string_concatenate(char *dest, char *s)
  * Checks if a given command is valid.
  *
  * @param command The command string to check.
- * @return Returns 1 if the command is valid, otherwise 0.
+ * @return Returns 0 if the command is valid, otherwise 1.
  */
 int command_checker(char *command)
 {
-    // printf("command：%s\n", command);
     if (my_strcmp(command, "-cap") != 0 && my_strcmp(command, "-u") != 0 && my_strcmp(command, "-l") != 0)
     {
-        return 0;
+        return 1;
     }
     else
     {
-        return 1;
+        return 0;
     }
 }

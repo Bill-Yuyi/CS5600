@@ -8,14 +8,14 @@ int main(int argc, char *argv[])
     // handle error if args is less than 3
     if (argc < 3)
     {
-        print("Please provide at least 2 args\n");
+        printf("Please provide at least 2 args\n");
         return -1;
     }
 
     // check if the first command is valid
-    if (command_checker(argv[1]) == 0)
+    if (command_checker(argv[1]) == 1)
     {
-        print("Command is only available for following: -caps, -u, -l\n");
+        printf("Command is only available for following: -caps, -u, -l\n");
         return -1;
     }
 

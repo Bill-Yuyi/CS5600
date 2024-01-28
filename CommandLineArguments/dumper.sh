@@ -1,4 +1,4 @@
-./arger-yuyi -cap "help is on the way"
+./arger-yuyi -cap help is on the way
 
 status=$?
 
@@ -9,7 +9,7 @@ else
     echo "Program failed with error code: $status"
 fi
 
-./arger-yuyi -a "help is on the way"
+./arger-yuyi -a help is on the way
 
 status=$?
 
