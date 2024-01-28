@@ -2,12 +2,32 @@
 
 int my_strcmp(const char *s1, const char *s2)
 {
-    while (*s1 && (*s1 == *s2))
+    while (*s1 == *s2)
     {
+        if (*s1 == '\0')
+        {
+            return 0;
+        }
         s1++;
         s2++;
     }
-    return *(const unsigned char *)s1 - *(const unsigned char *)s2;
+    return *s1 - *s2;
+}
+
+void capitalize(const char *s, char *res)
+{
+    int i = 0;
+    while (s[i] != '\0')
+    {
+        res[i] = s[i];
+        i++;
+    }
+    res[i] = '\0';
+
+    if (res[0] >= 'a' && res[0] <= 'z')
+    {
+        res[0] -= 'a' - 'A';
+    }
 }
 
 int command_checker(char *command)
@@ -28,15 +48,20 @@ int main(int argc, char *argv[])
     if (argc < 2)
     {
         printf("Please provide at least 2 args");
-        return 0;
+        return -1;
     }
-
-    for (int i = 1; i < argc; i++)
+    if (command_checker(argv[1]) == 0)
     {
-        if (command_checker(argv[i]) == 0)
+        printf("Command is only available for following: -caps, -u, -l\n");
+        return -1;
+    }
+    for (int i = 2; i < argc; i++)
+    {
+        if (my_strcmp(argv[1], "-cap"))
         {
-            printf("Command is only available for following: -caps, -u, -l\n");
-            return 0;
+            char[] res = char[sizeof(argv[1])];
+            capitalize(res);
+            printf("command：%s\n", res);
         }
     }
 
