@@ -1,4 +1,2 @@
 compile:
-	gcc cml.c -o dumper
-run:
-	./dumper
+	gcc cml.c mystrlib.c -o arger-yuyi
