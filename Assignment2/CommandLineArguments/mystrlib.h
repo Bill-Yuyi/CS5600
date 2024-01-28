@@ -5,3 +5,4 @@ void string_concatenate(char *dest, char *s);
 void upper(const char *s, char *res);
 void lower(const char *s, char *res);
 int command_checker(char *command);
+void string_operation(const char *command, const char *original_str, char *dest, char *src, int i);

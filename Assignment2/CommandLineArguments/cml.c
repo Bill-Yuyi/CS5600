@@ -23,35 +23,7 @@ int main(int argc, char *argv[])
     for (int i = 2; i < argc; i++)
     {
         char res[my_strlen(argv[i]) + 1];
-        if (my_strcmp(argv[1], "-cap") == 0)
-        {
-            capitalize(argv[i], res);
-            if (i != 2)
-            {
-                string_concatenate(result, " ");
-            }
-            string_concatenate(result, res);
-        }
-
-        else if (my_strcmp(argv[1], "-u") == 0)
-        {
-            upper(argv[i], res);
-            if (i != 2)
-            {
-                string_concatenate(result, " ");
-            }
-            string_concatenate(result, res);
-        }
-        else
-        {
-
-            lower(argv[i], res);
-            if (i != 2)
-            {
-                string_concatenate(result, " ");
-            }
-            string_concatenate(result, res);
-        }
+        string_operation(argv[1], argv[i], result, res, i);
     }
 
     printf("%s\n", result);

@@ -141,3 +141,46 @@ int command_checker(char *command)
         return 0;
     }
 }
+
+/**
+ * Modify on original_str according to
+ *
+ * @param command The command string to check.
+ * @param original_str Pointer to str is needed to modify
+ * @param dest Pointer to the destination string.
+ * @param src Pointer to the source string.
+ * @param i Index of current argument
+ * @return Returns 0 if the command is valid, otherwise 1.
+ */
+
+void string_operation(const char *command, const char *original_str, char *dest, char *src, int i)
+{
+    if (my_strcmp(command, "-cap") == 0)
+    {
+        capitalize(original_str, src);
+        if (i != 2)
+        {
+            string_concatenate(dest, " ");
+        }
+        string_concatenate(dest, src);
+    }
+
+    else if (my_strcmp(command, "-u") == 0)
+    {
+        upper(original_str, src);
+        if (i != 2)
+        {
+            string_concatenate(dest, " ");
+        }
+        string_concatenate(dest, src);
+    }
+    else
+    {
+        lower(original_str, src);
+        if (i != 2)
+        {
+            string_concatenate(dest, " ");
+        }
+        string_concatenate(dest, src);
+    }
+}
