@@ -1,3 +1,11 @@
+/**
+ * Compares two strings.
+ *
+ * @param s1 Pointer to the first string.
+ * @param s2 Pointer to the second string.
+ * @return Returns 0 if s1 and s2 are equal; a value less than 0 if s1 is less than s2; a value greater than 0 if s1 is greater than s2.
+ */
+
 int my_strcmp(const char *s1, const char *s2)
 {
     while (*s1 == *s2)
@@ -12,6 +20,12 @@ int my_strcmp(const char *s1, const char *s2)
     return *s1 - *s2;
 }
 
+/**
+ * Converts a string to uppercase.
+ *
+ * @param s Pointer to the string to be converted.
+ * @param res Pointer to the resulting string. This buffer should be large enough to hold the converted string.
+ */
 void upper(const char *s, char *res)
 {
     int i = 0;
@@ -27,6 +41,12 @@ void upper(const char *s, char *res)
     res[i] = '\0';
 }
 
+/**
+ * Converts a string to lowercase.
+ *
+ * @param s Pointer to the string to be converted.
+ * @param res Pointer to the resulting string. This buffer should be large enough to hold the converted string.
+ */
 void lower(const char *s, char *res)
 {
     int i = 0;
@@ -42,6 +62,12 @@ void lower(const char *s, char *res)
     res[i] = '\0';
 }
 
+/**
+ * Capitalizes the first character of a string.
+ *
+ * @param s Pointer to the string to be capitalized.
+ * @param res Pointer to the resulting string. This buffer should be large enough to hold the capitalized string.
+ */
 void capitalize(const char *s, char *res)
 {
     int i = 0;
@@ -58,6 +84,12 @@ void capitalize(const char *s, char *res)
     }
 }
 
+/**
+ * Calculates the length of a string.
+ *
+ * @param s Pointer to the string.
+ * @return The length of the string, excluding the terminating null byte.
+ */
 int my_strlen(const char *s)
 {
     int i = 0;
@@ -68,6 +100,12 @@ int my_strlen(const char *s)
     return i;
 }
 
+/**
+ * Concatenates the source string to the end of the destination string.
+ *
+ * @param dest Pointer to the destination string. Must have enough space to store the concatenated result.
+ * @param s Pointer to the source string.
+ */
 void string_concatenate(char *dest, char *s)
 {
 
@@ -84,4 +122,23 @@ void string_concatenate(char *dest, char *s)
     }
 
     *dest = '\0';
+}
+
+/**
+ * Checks if a given command is valid.
+ *
+ * @param command The command string to check.
+ * @return Returns 1 if the command is valid, otherwise 0.
+ */
+int command_checker(char *command)
+{
+    // printf("command：%s\n", command);
+    if (my_strcmp(command, "-cap") != 0 && my_strcmp(command, "-u") != 0 && my_strcmp(command, "-l") != 0)
+    {
+        return 0;
+    }
+    else
+    {
+        return 1;
+    }
 }
