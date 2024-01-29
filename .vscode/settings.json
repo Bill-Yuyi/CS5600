@@ -2,6 +2,7 @@
     "files.associations": {
         "*.ejs": "html",
         "stdlib.h": "c",
-        "dynblock.h": "c"
+        "dynblock.h": "c",
+        "genRand_yuyi.C": "cpp"
     }
 }
