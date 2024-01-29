@@ -9,6 +9,28 @@ else
     echo "Program failed with error code: $status"
 fi
 
+./arger-yuyi -u help is on the way
+
+status=$?
+
+
+if [ $status -eq 0 ]; then
+    echo "Program executed successfully."
+else
+    echo "Program failed with error code: $status"
+fi
+
+./arger-yuyi -l help is on the way
+
+status=$?
+
+
+if [ $status -eq 0 ]; then
+    echo "Program executed successfully."
+else
+    echo "Program failed with error code: $status"
+fi
+
 ./arger-yuyi -a help is on the way
 
 status=$?
