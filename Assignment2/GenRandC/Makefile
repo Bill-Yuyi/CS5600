@@ -4,4 +4,5 @@ all:
 compile:
 	gcc genRand_yuyi.c -o genRand
 run:
-	./genRand
+	./genRand 10 test.txt
+	
