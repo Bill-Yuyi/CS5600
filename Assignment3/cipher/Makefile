@@ -2,6 +2,6 @@ all:
 	make compile
 	make run
 compile:
-	gcc polybius.c table.c -o polybius
+	gcc polybius.c table.c cipher.c -o cipher
 run:
-	./polybius
+	./cipher

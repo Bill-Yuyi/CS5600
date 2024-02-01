@@ -65,15 +65,3 @@ char *pbDecode(const char *ciphertext, table_t *table)
     *decodeTextPointer = '\0';
     return decodeText;
 }
-
-int main()
-{
-    table_t *table = (table_t *)malloc(sizeof(table_t));
-    initializeTable(table);
-    char *encodedScript = pbEncode("Hello, World", table);
-    printf("%s\n", encodedScript);
-    char *decodeScript = pbDecode("2315313134, 5234423114", table);
-    printf("%s\n", decodeScript);
-    free(table);
-    return 0;
-}
