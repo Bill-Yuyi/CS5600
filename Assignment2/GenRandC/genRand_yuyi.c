@@ -30,7 +30,7 @@ int isDigitString(const char *str)
 {
     while (*str)
     {
-        if (!isdigit((unsigned char)*str))
+        if (!isdigit((char)*str))
         {
             return 0;
         }
@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
 
     if (!isDigitString(argv[1]))
     {
-        printf("Please give a valid number in the first argument");
+        printf("Please give a valid number in the first argument\n");
         return -1;
     }
 

@@ -3,6 +3,8 @@
         "*.ejs": "html",
         "stdlib.h": "c",
         "dynblock.h": "c",
-        "genRand_yuyi.C": "cpp"
-    }
+        "genRand_yuyi.C": "cpp",
+        "string.h": "c"
+    },
+    "C_Cpp.errorSquiggles": "enabled"
 }
