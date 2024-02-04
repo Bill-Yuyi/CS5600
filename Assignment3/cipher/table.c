@@ -12,6 +12,13 @@ typedef struct
     int encodeMap[ENCODE_SIZE];
 } table_t;
 
+/**
+ * Initializes a Polybius square table for encoding and decoding operations.
+ *
+ * @param table A pointer to a `table_t` structure that will be initialized with the
+ *              Polybius square encoding and decoding mappings.
+ */
+
 void initializeTable(table_t *table)
 {
     const char letters[CHAR_MAP_SIZE * CHAR_MAP_SIZE] = {
@@ -30,6 +37,16 @@ void initializeTable(table_t *table)
         }
     table->encodeMap['J' - 'A'] = 25;
 }
+
+/**
+ * Encodes a single character using the provided Polybius square table.
+ *
+ * @param char2encode A pointer to the character to be encoded.
+ * @param table A pointer to a `table_t` structure that provides the Polybius square
+ *              encoding mapping.
+ * @return A pointer to a dynamically allocated string containing the two-digit encoded
+ *         character.
+ */
 
 char *encodeChar(const char *char2encode, table_t *table)
 {
