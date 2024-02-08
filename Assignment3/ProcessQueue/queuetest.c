@@ -26,6 +26,7 @@ int main()
     }
 
     // test they are correctly inserted
+    printf("We should have no.1, no.2, no.3, no.4 and no.5 in queue\n");
     printQueue(queue);
     printf("expected length: 5, actual: %d\n", qsize(queue));
     printf("----------\n");
@@ -34,6 +35,7 @@ int main()
     printf("pop the max priroty\n");
     process_t *maxPriorityProcess = rmProcess(queue);
     printf("Process that is poped out: process %s\n", maxPriorityProcess->name);
+    printf("We should have no.1, no.2, no.3 and no.4 in queue\n");
     printQueue(queue);
     printf("expected length: 4, actual: %d\n", qsize(queue));
     printf("----------\n");
@@ -44,7 +46,9 @@ int main()
     printf("pop the front\n");
     process_t *processPopedOut = (process_t *)(popQ(queue));
     printf("Process that is poped out: process %s\n", processPopedOut->name);
+    printf("We should have no.2, no.3 and no.4 in queue\n");
     printQueue(queue);
+    printf("expected length: 3, actual: %d\n", qsize(queue));
     free(processPopedOut->name);
     free(processPopedOut);
 

@@ -50,10 +50,7 @@ int main(int argc, char *argv[])
         }
     }
     printf("%s\n", res);
-    char *encodedScript = pbEncode("Hello, World", table);
-    printf("%s\n", encodedScript);
-    char *decodeScript = pbDecode("2315313134, 5234423114", table);
-    printf("%s\n", decodeScript);
+
     free(table);
     free(res);
     return 0;

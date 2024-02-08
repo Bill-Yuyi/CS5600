@@ -4,7 +4,10 @@
         "stdlib.h": "c",
         "dynblock.h": "c",
         "genRand_yuyi.C": "cpp",
-        "string.h": "c"
+        "string.h": "c",
+        "limits.h": "c",
+        "__node_handle": "c",
+        "stdio.h": "c"
     },
     "C_Cpp.errorSquiggles": "enabled"
 }
