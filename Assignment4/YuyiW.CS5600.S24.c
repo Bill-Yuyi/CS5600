@@ -3,28 +3,40 @@
 #include <unistd.h>
 #include <pthread.h>
 
-char *globalArr[1000];
-void *worker(void *data)
+int globalArr[1000];
+void *workerForTh1(void *data)
 {
-    char *name = (char *)data;
 
     for (int i = 0; i < 120; i++)
     {
         usleep(50000);
-        printf("Hi from thread name = %s\n", name);
+        globalArr[i] = i;
     }
 
-    printf("Thread %s done!\n", name);
+    printf("Thread %s done!\n", "1");
+    return NULL;
+}
+
+void *workerForTh2(void *data)
+{
+
+    for (int i = 0; i < 120; i++)
+    {
+        usleep(50000);
+        printf("current number %d\n", globalArr[i]);
+    }
+
+    printf("Thread %s done!\n", "2");
     return NULL;
 }
 
 int main(void)
 {
     pthread_t th1, th2;
-    pthread_create(&th1, NULL, worker, "X");
-    pthread_create(&th2, NULL, worker, "Y");
+    pthread_create(&th1, NULL, workerForTh1, "X");
+    pthread_create(&th2, NULL, workerForTh2, "Y");
     sleep(1);
-    printf("====> Cancelling Thread %lu!!\n", (unsigned long)th2);
+    printf("====> Cancelling Thread %lu!\n", (unsigned long)th2);
     pthread_cancel(th2);
     usleep(100000);
     printf("====> Cancelling Thread %lu!\n", (unsigned long)th1);
