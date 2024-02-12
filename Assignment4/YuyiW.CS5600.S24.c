@@ -2,7 +2,14 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <pthread.h>
-
+/**
+ * Answer to Question 4:
+ * it is not consistent since thread 2 may access the array indecies where
+ * thread 1 havent yet initialized. This inconsistency is expected when multiple threads access
+ * and modify shared data without proper synchronization.
+ * To avoid such problems, we should use something like mutexes, semaphores, or condition variables.
+ *
+ */
 int globalArr[1000];
 void *workerForTh1(void *data)
 {
@@ -23,7 +30,7 @@ void *workerForTh2(void *data)
     for (int i = 0; i < 120; i++)
     {
         usleep(50000);
-        printf("current number %d\n", globalArr[i]);
+        printf("number in position %d is: %d\n", i, globalArr[i]);
     }
 
     printf("Thread %s done!\n", "2");
