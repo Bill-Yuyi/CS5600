@@ -28,3 +28,4 @@ process_t *rmProcess(queue_t *queue);
 int qsize(queue_t *queue);
 void printQueue(queue_t *queue);
 void finishQueue(queue_t *queue);
+void addWordsToQueue(FILE *file, queue_t *queue);

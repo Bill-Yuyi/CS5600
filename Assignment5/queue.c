@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <stdio.h>
+#include <string.h>
+
 typedef struct
 {
     /* data */
@@ -190,6 +192,8 @@ void finishQueue(queue_t *queue)
         free(current);
         current = next;
     }
+    queue->head = NULL;
+    queue->tail = NULL;
     free(queue);
 }
 
@@ -203,9 +207,31 @@ void printQueue(queue_t *queue)
     struct node *tmp = queue->head->next;
     while (tmp != queue->tail)
     {
-        process_t *currentProcess = (process_t *)(tmp->data);
+        char *currentWord = (char *)(tmp->data);
 
-        printf("process %s priority: %d\n", currentProcess->name, currentProcess->priority);
+        printf("%s \n", currentWord);
         tmp = tmp->next;
+    }
+}
+
+void addWordsToQueue(FILE *file, queue_t *queue)
+{
+    char line[1024];
+    const char *delimiters = " "; // 定义分割单词的分隔符，包括空格和换行符
+
+    while (fgets(line, sizeof(line), file) != NULL)
+    {
+        char *token = strtok(line, delimiters); // 分割第一个单词
+        while (token != NULL)
+        {
+            char *word = strdup(token); // 复制单词
+            if (word == NULL)
+            {
+                fprintf(stderr, "Memory allocation failed\n");
+                exit(EXIT_FAILURE);
+            }
+            add2q(queue, word);               // 将单词添加到队列中
+            token = strtok(NULL, delimiters); // 继续分割剩余的字符串
+        }
     }
 }
