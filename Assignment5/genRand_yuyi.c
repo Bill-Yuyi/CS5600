@@ -4,6 +4,11 @@
 #include <string.h>
 #include <ctype.h>
 #include "queue.h"
+#include <unistd.h>
+#include <sys/wait.h>
+#include <time.h>
+
+#define WORDS_PER_FILE 100
 
 unsigned long lcg(unsigned long *seed)
 {
@@ -27,17 +32,48 @@ int genRand(int min, int max)
     return (lcg(&seed) % (max - min + 1)) + min;
 }
 
-int isDigitString(const char *str)
+void processWords(queue_t *queue)
 {
-    while (*str)
+    int count = 0;
+    int fd[2];
+    pid_t pid;
+    char *word;
+
+    while ((word = (char *)popQ(queue)) != NULL)
     {
-        if (!isdigit((char)*str))
+        if (count % WORDS_PER_FILE == 0)
         {
-            return 0;
+
+            if (pipe(fd) == -1)
+            {
+                perror("pipe");
+                exit(EXIT_FAILURE);
+            }
+            pid = fork();
+            if (pid == -1)
+            {
+                perror("fork");
+                exit(EXIT_FAILURE);
+            }
+            if (pid == 0)
+            {
+                close(fd[1]);
+                dup2(fd[0], STDIN_FILENO);
+                char filename[64];
+                sprintf(filename, "./outputs/encrypted_%d.txt", count / WORDS_PER_FILE);
+                execl("./cipher_program", "cipher_program", filename, NULL);
+                exit(EXIT_SUCCESS);
+            }
+            close(fd[0]);
         }
-        str++;
+        write(fd[1], word, strlen(word));
+        write(fd[1], "\n", 1);
+        count++;
+        // printf("%d\n", qsize(queue));
     }
-    return 1;
+
+    close(fd[1]);
+    // wait(NULL);
 }
 
 int main(int argc, char *argv[])
@@ -85,7 +121,7 @@ int main(int argc, char *argv[])
 
     char line[1024];
 
-    file = fopen("test.txt", "r");
+    file = fopen(argv[1], "r");
     if (file == NULL)
     {
         perror("Error opening file");
@@ -93,9 +129,11 @@ int main(int argc, char *argv[])
     }
 
     addWordsToQueue(file, queue);
-
-    // printQueue(queue);
     printf("%d \n", qsize(queue));
+
+    // start encoding
+    processWords(queue);
+
     finishQueue(queue);
     fclose(file);
 
