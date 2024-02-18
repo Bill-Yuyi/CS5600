@@ -20,6 +20,9 @@ void processWords(queue_t *queue)
     pid_t pid;
     char *word;
 
+    // makdir outputs
+    mkdir("./outputs", 0755);
+
     while ((word = (char *)popQ(queue)) != NULL)
     {
         if (count % WORDS_PER_FILE == 0)
@@ -29,31 +32,44 @@ void processWords(queue_t *queue)
                 perror("pipe");
                 exit(EXIT_FAILURE);
             }
+
             pid = fork();
             if (pid == -1)
             {
                 perror("fork");
                 exit(EXIT_FAILURE);
             }
+
             if (pid == 0)
             {
                 close(fd[1]);
                 dup2(fd[0], STDIN_FILENO);
+                close(fd[0]);
+
                 char filename[64];
                 sprintf(filename, "./outputs/encrypted_%d.txt", count / WORDS_PER_FILE);
-                execl("./cipher_program", "cipher_program", filename, NULL);
+                execl("./cipher_program", "cipher_program", filename, (char *)NULL);
                 exit(EXIT_SUCCESS);
             }
             close(fd[0]);
         }
+
         write(fd[1], word, strlen(word));
         write(fd[1], "\n", 1);
         count++;
-        printf("%d\n", count);
+
+        if (count % WORDS_PER_FILE == 0)
+        {
+            close(fd[1]);
+            waitpid(pid, NULL, 0);
+        }
     }
 
-    close(fd[1]);
-    wait(NULL);
+    if (count % WORDS_PER_FILE != 0)
+    {
+        close(fd[1]);
+        waitpid(pid, NULL, 0);
+    }
 }
 
 int main(int argc, char *argv[])

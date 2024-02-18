@@ -6,7 +6,6 @@ compile:
 	gcc encodeMain.c table.c polybius.c -o cipher_program
 	chmod +x cipher_program
 run:
-	mkdir outputs
 	./mainProgram test.txt
 clear:
 	rm -rf outputs
