@@ -6,31 +6,12 @@
 #include "queue.h"
 #include <unistd.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <time.h>
+#include "genRand.h"
 
 #define WORDS_PER_FILE 100
-
-unsigned long lcg(unsigned long *seed)
-{
-    const unsigned long a = 22695477;
-    const unsigned long c = 1;
-    const unsigned long m = 2147483648;
-
-    *seed = (a * (*seed) + c) % m;
-    return *seed;
-}
-
-int genRand(int min, int max)
-{
-    static unsigned long seed = 0;
-    int wordsPerLine = 20;
-    if (seed == 0)
-    {
-        seed = time(NULL);
-    }
-
-    return (lcg(&seed) % (max - min + 1)) + min;
-}
 
 void processWords(queue_t *queue)
 {
@@ -43,7 +24,6 @@ void processWords(queue_t *queue)
     {
         if (count % WORDS_PER_FILE == 0)
         {
-
             if (pipe(fd) == -1)
             {
                 perror("pipe");
@@ -69,19 +49,15 @@ void processWords(queue_t *queue)
         write(fd[1], word, strlen(word));
         write(fd[1], "\n", 1);
         count++;
-        // printf("%d\n", qsize(queue));
+        printf("%d\n", count);
     }
 
     close(fd[1]);
-    // wait(NULL);
+    wait(NULL);
 }
 
 int main(int argc, char *argv[])
 {
-    unsigned long seed = time(NULL);
-    int wordLength;
-    int wordsPerLine = 20;
-
     char *filename = argv[1];
 
     FILE *file = fopen(filename, "w");
@@ -91,45 +67,22 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    for (int i = 0; i < 10000; i++)
-    {
-        char word[6];
-        wordLength = genRand(1, 5);
-        for (int j = 0; j < wordLength; j++)
-        {
-            word[j] = (char)(genRand(97, 122));
-        }
-        word[wordLength] = '\0';
-        fprintf(file, "%s", word);
-        if (i < 9999)
-        {
-            if ((i + 1) % wordsPerLine == 0)
-            {
-                fprintf(file, "\n");
-            }
-            else
-            {
-                fprintf(file, " ");
-            }
-        }
-    }
+    // write 10000 random words
+    writeRandomWords(file);
 
-    fclose(file);
-
+    // initialize the queue
     queue_t *queue = (queue_t *)malloc(sizeof(queue_t));
     initializeQueue(queue);
 
+    // add words into queue
     char line[1024];
-
     file = fopen(argv[1], "r");
     if (file == NULL)
     {
         perror("Error opening file");
         return -1;
     }
-
     addWordsToQueue(file, queue);
-    printf("%d \n", qsize(queue));
 
     // start encoding
     processWords(queue);

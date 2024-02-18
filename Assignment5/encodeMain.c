@@ -33,7 +33,6 @@ int main(int argc, char *argv[])
     while (fgets(buffer, sizeof(buffer), stdin) != NULL)
     {
         char *res = pbEncode(buffer, table);
-        // printf("%s", res);
         fputs(res, outputFile);
         fflush(outputFile);
         free(res);
