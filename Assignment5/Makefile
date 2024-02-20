@@ -3,11 +3,12 @@ all:
 	make run
 compile:
 	gcc mainProgram.c queue.c genRand.c -o mainProgram -lpthread
-	gcc encodeMain.c table.c polybius.c -o cipher_program
-	chmod +x cipher_program
+	gcc encodeMain.c table.c polybius.c -o cipherProgram
+	chmod +x cipherProgram
 run:
-	./mainProgram test.txt
-clear:
+	./mainProgram words.txt
+clean:
 	rm -rf outputs
-	rm ./cipher_program
+	rm ./words.txt
+	rm ./cipherProgram
 	rm ./mainProgram

@@ -2,6 +2,14 @@
 #include <time.h>
 
 #define WORDS_PER_LINE 20
+
+/**
+ * Implements a lcg algorithm for generating pseudorandom numbers.
+ *
+ * @param seed A pointer to an unsigned long value representing the current seed.
+ *
+ * @return The pseudorandom number generated using the lcg algorithm.
+ */
 unsigned long lcg(unsigned long *seed)
 {
     const unsigned long a = 22695477;
@@ -12,6 +20,13 @@ unsigned long lcg(unsigned long *seed)
     return *seed;
 }
 
+/**
+ * Generates a random integer within the range [min, max] inclusive.
+ *
+ * @param min The minimum value of the range.
+ * @param max The maximum value of the range.
+ * @return A pseudorandom integer between min and max.
+ */
 int genRand(int min, int max)
 {
     static unsigned long seed = 0;
@@ -24,6 +39,12 @@ int genRand(int min, int max)
     return (lcg(&seed) % (max - min + 1)) + min;
 }
 
+/**
+ * Writes randomly generated words to a file. Each word is composed of lowercase letters
+ * with lengths in range [1,5].
+ *
+ * @param file The file pointer.
+ */
 void writeRandomWords(FILE *file)
 {
     int wordLength;

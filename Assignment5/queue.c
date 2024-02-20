@@ -2,7 +2,10 @@
 #include <limits.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
+#include <sys/stat.h>
 
+#define WORDS_PER_FILE 100
 typedef struct
 {
     /* data */
@@ -214,24 +217,94 @@ void printQueue(queue_t *queue)
     }
 }
 
+/**
+ * Read the file and add words into the queue
+ *
+ * @param file Pointer to the file.
+ * @param queue Pointer to the queue.
+ */
 void addWordsToQueue(FILE *file, queue_t *queue)
 {
     char line[1024];
-    const char *delimiters = " "; // 定义分割单词的分隔符，包括空格和换行符
+    const char *delimiters = " ";
 
     while (fgets(line, sizeof(line), file) != NULL)
     {
-        char *token = strtok(line, delimiters); // 分割第一个单词
+        char *token = strtok(line, delimiters);
         while (token != NULL)
         {
-            char *word = strdup(token); // 复制单词
+            char *word = strdup(token);
             if (word == NULL)
             {
                 fprintf(stderr, "Memory allocation failed\n");
                 exit(EXIT_FAILURE);
             }
-            add2q(queue, word);               // 将单词添加到队列中
-            token = strtok(NULL, delimiters); // 继续分割剩余的字符串
+            add2q(queue, word);
+            token = strtok(NULL, delimiters);
         }
+    }
+}
+
+/**
+ * Encode words in the queue in size of 100 words as a batch.
+ *
+ * @param queue Pointer to the queue.
+ */
+void processWords(queue_t *queue)
+{
+    int count = 0;
+    int fd[2];
+    pid_t pid;
+    char *word;
+
+    // makdir outputs
+    mkdir("./outputs", 0755);
+
+    while ((word = (char *)popQ(queue)) != NULL)
+    {
+        if (count % WORDS_PER_FILE == 0)
+        {
+            if (pipe(fd) == -1)
+            {
+                perror("pipe");
+                exit(EXIT_FAILURE);
+            }
+
+            pid = fork();
+            if (pid == -1)
+            {
+                perror("fork");
+                exit(EXIT_FAILURE);
+            }
+
+            if (pid == 0)
+            {
+                close(fd[1]);
+                dup2(fd[0], STDIN_FILENO);
+                close(fd[0]);
+
+                char filename[64];
+                sprintf(filename, "./outputs/encrypted_%d.txt", count / WORDS_PER_FILE);
+                execl("./cipherProgram", "cipherProgram", filename, (char *)NULL);
+                exit(EXIT_SUCCESS);
+            }
+            close(fd[0]);
+        }
+
+        write(fd[1], word, strlen(word));
+        write(fd[1], "\n", 1);
+        count++;
+
+        if (count % WORDS_PER_FILE == 0)
+        {
+            close(fd[1]);
+            waitpid(pid, NULL, 0);
+        }
+    }
+
+    if (count % WORDS_PER_FILE != 0)
+    {
+        close(fd[1]);
+        waitpid(pid, NULL, 0);
     }
 }

@@ -111,7 +111,3 @@ char *pbDecode(const char *ciphertext, table_t *table)
     *decodeTextPointer = '\0';
     return decodeText;
 }
-
-void encodeAndWriteToFile(queue_t queue, table_t *table)
-{
-}
