@@ -6,7 +6,4 @@ compile:
 run:
 	./mainProgram
 clean:
-	rm -rf outputs
-	rm ./words.txt
-	rm ./cipherProgram
 	rm ./mainProgram
