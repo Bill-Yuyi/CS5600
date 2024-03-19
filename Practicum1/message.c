@@ -6,12 +6,21 @@
 #include <time.h>
 #include <string.h>
 
+// total size = 1024 bytes
+// identifier = 4 bytes, timeStamp = 8bytes, flag = 4 bytes
+// remaining space = 1024 - 4 - 4 - 8 = 1008 bytes
+// As I assign sender and receiver to 128 bytes, and content will be
+// 1008 - 256 = 752 bytes
+#define MAX_SENDER_SIZE 128
+#define MAX_RECEIVER_SIZE 128
+#define MAX_CONTENT_SIZE 752
+
 typedef struct{
     int identifier;
     time_t timeStamp;
-    char* sender;
-    char* receiver;
-    char* content;
+    char sender[MAX_SENDER_SIZE];
+    char receiver[MAX_RECEIVER_SIZE];
+    char content[MAX_CONTENT_SIZE];
     int flag;
 } message_t;
 
@@ -33,7 +42,7 @@ char* trimNewline(char* line) {
     return line;
 }
 
-message_t* createMessage(char* sender, char* receiver, char* context) {
+message_t* createMessage(const char* sender, const char* receiver,const char* content) {
     time_t currentTime = time(NULL);
     if(currentTime == ((time_t) -1)) {
         return NULL;
@@ -45,9 +54,15 @@ message_t* createMessage(char* sender, char* receiver, char* context) {
     }
     newMessage->identifier = ++last_identifier;
     newMessage->timeStamp = currentTime;
-    newMessage->sender = strCopy(sender);
-    newMessage->receiver = strCopy(receiver);
-    newMessage->content = strCopy(context);
+    strncpy(newMessage->sender, sender, MAX_SENDER_SIZE);
+    newMessage->sender[MAX_SENDER_SIZE - 1] = '\0';
+
+    strncpy(newMessage->receiver, receiver, MAX_RECEIVER_SIZE);
+    newMessage->receiver[MAX_RECEIVER_SIZE - 1] = '\0';
+
+    strncpy(newMessage->content, content, MAX_CONTENT_SIZE);
+    newMessage->content[MAX_CONTENT_SIZE - 1] = '\0';
+
     newMessage->flag = 0;
 
     return newMessage;
@@ -95,11 +110,17 @@ message_t* retrieveMsg(int identifier) {
             case 0:
                 msg->timeStamp = (time_t) atol(line); break;
             case 1:
-                msg->sender = strCopy(line); break;
+                strncpy(msg->sender, line, MAX_SENDER_SIZE);
+                msg->sender[MAX_SENDER_SIZE - 1] = '\0';
+                break;
             case 2:
-                msg->receiver = strCopy(line); break;
+                strncpy(msg->receiver, line, MAX_RECEIVER_SIZE);
+                msg->receiver[MAX_RECEIVER_SIZE - 1] = '\0';
+                break;
             case 3:
-                msg->content = strCopy(line); break;
+                strncpy(msg->content, line, MAX_CONTENT_SIZE);
+                msg->content[MAX_CONTENT_SIZE - 1] = '\0';
+                break;
             case 4:
                 msg->flag = atoi(line); break;
         }
@@ -111,9 +132,6 @@ message_t* retrieveMsg(int identifier) {
 
 void destroyMessage(message_t* msg) {
     if (msg != NULL) {
-        free(msg->sender);
-        free(msg->receiver);
-        free(msg->content);
         free(msg);
     }
 }

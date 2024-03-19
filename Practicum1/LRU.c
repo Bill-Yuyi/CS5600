@@ -68,7 +68,7 @@ message_t* LRUCacheGet(LRUCache* cache, int key) {
     node* result;
     HASH_FIND_INT(cache->map, &key, result);
     if(result == NULL) {
-        //TODO: if not existing in cache, get it from disk,and add it to cache
+        //if not existing in cache, get it from disk,and add it to cache
         result = (node*) malloc(sizeof(node));
         if(result == NULL) {
             perror("Error occurs when allocating memory for LRUCacheGet");
