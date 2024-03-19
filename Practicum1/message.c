@@ -70,7 +70,7 @@ message_t* createMessage(const char* sender, const char* receiver,const char* co
 
 int storeMessage(message_t* msg) {
     char filename[256];
-    snprintf(filename, sizeof(filename), "%d.txt", msg->identifier);
+    snprintf(filename, sizeof(filename), "disk/%d.txt", msg->identifier);
 
     FILE* file = fopen(filename, "w");
     if(!file) {
@@ -78,7 +78,7 @@ int storeMessage(message_t* msg) {
         return -1; //error happened
     }
     msg->flag = 1;
-    fprintf(file,"%ld\n%s\n= %s\n%s\n%d\n"
+    fprintf(file,"%ld\n%s\n%s\n%s\n%d\n"
             ,(long)msg->timeStamp, msg->sender, msg->receiver, msg->content, msg->flag);
     fclose(file);
     return 0; // success
@@ -86,7 +86,7 @@ int storeMessage(message_t* msg) {
 
 message_t* retrieveMsg(int identifier) {
     char filename[256];
-    snprintf(filename, sizeof(filename), "%d.txt", identifier);
+    snprintf(filename, sizeof(filename), "disk/%d.txt", identifier);
 
     message_t* msg = (message_t*) malloc(sizeof(message_t));
     if(msg == NULL) {

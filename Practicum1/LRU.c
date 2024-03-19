@@ -64,28 +64,6 @@ void update(node* nodeToUpdate, LRUCache* cache) {
     add(nodeToUpdate, cache);
 }
 
-message_t* LRUCacheGet(LRUCache* cache, int key) {
-    node* result;
-    HASH_FIND_INT(cache->map, &key, result);
-    if(result == NULL) {
-        //if not existing in cache, get it from disk,and add it to cache
-        result = (node*) malloc(sizeof(node));
-        if(result == NULL) {
-            perror("Error occurs when allocating memory for LRUCacheGet");
-            return NULL;
-        }
-
-        result->val = retrieveMsg(key);
-        if(result->val == NULL) {
-            return NULL;
-        }
-        add(result, cache);
-        return result->val;
-    }
-    update(result, cache);
-    return result->val;
-}
-
 void LRUCachePut(LRUCache* cache, message_t* messageToPut) {
     node* existingNode;
     HASH_FIND_INT(cache->map, &messageToPut->identifier, existingNode);
@@ -114,4 +92,68 @@ void LRUCachePut(LRUCache* cache, message_t* messageToPut) {
             cache->count--;
         }
     }
+}
+
+message_t* LRUCacheGet(LRUCache* cache, int key) {
+    node* result;
+    HASH_FIND_INT(cache->map, &key, result);
+    if(result == NULL) {
+        //if not existing in cache, get it from disk,and add it to cache
+        result = (node*) malloc(sizeof(node));
+        if(result == NULL) {
+            perror("Error occurs when allocating memory for LRUCacheGet");
+            return NULL;
+        }
+
+        result->val = retrieveMsg(key);
+        if(result->val == NULL) {
+            return NULL;
+        }
+        LRUCachePut(cache, result->val);
+        return result->val;
+    }
+    update(result, cache);
+    return result->val;
+}
+
+int LRUCacheFind(LRUCache* cache, int key) {
+    node* result;
+    HASH_FIND_INT(cache->map, &key, result);
+    if(result == NULL) {
+        return 1;
+    }
+    return 0;
+}
+
+
+
+/**
+ * free the memory allocated for each msg in the cache.
+ *
+ * @param cache Pointer to the cache.
+ */
+void destroyLRUCache(LRUCache *cache)
+{
+    if (cache == NULL)
+    {
+        return;
+    }
+
+    struct node *current = cache->head;
+    while (current != NULL)
+    {
+        struct node *next = current->next;
+
+        if (current->val != NULL)
+        {
+            message_t *msg = current->val;
+            destroyMessage(msg);
+        }
+
+        free(current);
+        current = next;
+    }
+    cache->head = NULL;
+    cache->tail = NULL;
+    free(cache);
 }
