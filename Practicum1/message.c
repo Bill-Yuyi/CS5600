@@ -24,24 +24,30 @@ typedef struct{
     int flag;
 } message_t;
 
-static int last_identifier = 0;
+static int lastIdentifier = 0;
 
-char* strCopy(const char* str) {
-    if(str == NULL) {
-        return NULL;
-    }
-
-    char* dup = malloc(strlen(str) + 1);
-    if(dup != NULL) strcpy(dup, str);
-    return dup;
-}
-
+/**
+ * Removes the newline character from the end of a string, if present.
+ *
+ * @param line Pointer to the line.
+ *
+ * @return The modified string with the newline character removed.
+ */
 char* trimNewline(char* line) {
     char* p = strchr(line, '\n');
     if (p) *p = '\0';
     return line;
 }
 
+/**
+ * Creates a new message with specified sender, receiver, and content
+ *
+ * @param sender The sender of the message.
+ * @param receiver The receiver of the message.
+ * @param content: The content of the message.
+ *
+ * @return A pointer to the newly created message_t structure, or NULL if an error occurred.
+ */
 message_t* createMessage(const char* sender, const char* receiver,const char* content) {
     time_t currentTime = time(NULL);
     if(currentTime == ((time_t) -1)) {
@@ -52,7 +58,7 @@ message_t* createMessage(const char* sender, const char* receiver,const char* co
     if(newMessage == NULL) {
         return NULL;
     }
-    newMessage->identifier = ++last_identifier;
+    newMessage->identifier = ++lastIdentifier;
     newMessage->timeStamp = currentTime;
     strncpy(newMessage->sender, sender, MAX_SENDER_SIZE);
     newMessage->sender[MAX_SENDER_SIZE - 1] = '\0';
@@ -68,6 +74,13 @@ message_t* createMessage(const char* sender, const char* receiver,const char* co
     return newMessage;
 }
 
+/**
+ * Creates a new message with specified sender, receiver, and content
+ *
+ * @param msg Pointer to the message needed to be stored to disk.
+ *
+ * @return 0 on success, 1 on error.
+ */
 int storeMessage(message_t* msg) {
     char filename[256];
     snprintf(filename, sizeof(filename), "disk/%d.txt", msg->identifier);
@@ -75,7 +88,7 @@ int storeMessage(message_t* msg) {
     FILE* file = fopen(filename, "w");
     if(!file) {
         perror("Error opening the file");
-        return -1; //error happened
+        return 1; //error happened
     }
     msg->flag = 1;
     fprintf(file,"%ld\n%s\n%s\n%s\n%d\n"
@@ -84,6 +97,14 @@ int storeMessage(message_t* msg) {
     return 0; // success
 }
 
+/**
+ * Retrieves a message from disk based on its identifier.
+ *
+ * @param identifier The identifier of the message to retrieve.
+ *
+ * @return A pointer to the retrieved message_t structure,
+ * or NULL if the message could not be found or an error occurred.
+ */
 message_t* retrieveMsg(int identifier) {
     char filename[256];
     snprintf(filename, sizeof(filename), "disk/%d.txt", identifier);
@@ -130,6 +151,11 @@ message_t* retrieveMsg(int identifier) {
     return msg;
 }
 
+/**
+ * free the memory allocated for msg.
+ *
+ * @param msg Pointer to the message.
+ */
 void destroyMessage(message_t* msg) {
     if (msg != NULL) {
         free(msg);

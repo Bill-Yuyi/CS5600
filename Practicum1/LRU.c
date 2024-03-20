@@ -17,6 +17,8 @@ typedef struct {
  * Initializes a LRU by allocating memory for the head and tail nodes
  * and setting them up with no actual data.
  * @param LRUCache Pointer to the LRUCache to be initialized.
+ *
+ * @return Pointer to the initialized LRUCache.
  */
 LRUCache* initializeLRU(int capacity)
 {
@@ -44,6 +46,11 @@ LRUCache* initializeLRU(int capacity)
     return cache;
 }
 
+/**
+ * Adds a node to the front of the LRU cache's doubly linked list, just after the head.
+ * @param nodeToAdd Pointer to the node to be added
+ * @param LRUCache Pointer to the LRUCache.
+ */
 void add(node* nodeToAdd, LRUCache* cache) {
     struct node* after = cache->head->next;
     nodeToAdd->next = after;
@@ -52,6 +59,10 @@ void add(node* nodeToAdd, LRUCache* cache) {
     nodeToAdd->prev = cache->head;
 }
 
+/**
+ * Removes a node from the LRU cache's doubly linked list
+ * @param nodeToDelete Pointer to the node to be deleted
+ */
 void delete(node* nodeToDelete) {
     struct node* before = nodeToDelete->prev;
     struct node* after = nodeToDelete->next;
@@ -59,11 +70,23 @@ void delete(node* nodeToDelete) {
     after->prev = before;
 }
 
+/**
+ * Moves a node to the front of the LRU cache to mark it as recently used.
+ * @param nodeToUpdate Pointer to the node to be updated
+ * @param LRUCache Pointer to the LRUCache.
+ */
 void update(node* nodeToUpdate, LRUCache* cache) {
     delete(nodeToUpdate);
     add(nodeToUpdate, cache);
 }
 
+/**
+ * Inserts or updates a message in the LRU cache.
+ * If the cache exceeds its capacity, the least recently used item is removed.
+ * @param LRUCache Pointer to the LRUCache.
+ * @param messageToPut Pointer to the message.
+ *
+ */
 void LRUCachePut(LRUCache* cache, message_t* messageToPut) {
     node* existingNode;
     HASH_FIND_INT(cache->map, &messageToPut->identifier, existingNode);
@@ -94,6 +117,14 @@ void LRUCachePut(LRUCache* cache, message_t* messageToPut) {
     }
 }
 
+/**
+ * Retrieves a message from the LRU cache by its identifier.
+ * If the message is not found in the cache, it attempts to retrieve it from the disk and then adds it to the cache.
+ * @param LRUCache Pointer to the LRUCache.
+ * @param key an identifier for the message.
+ *
+ * @return the message with the same identifier
+ */
 message_t* LRUCacheGet(LRUCache* cache, int key) {
     node* result;
     HASH_FIND_INT(cache->map, &key, result);
@@ -116,6 +147,13 @@ message_t* LRUCacheGet(LRUCache* cache, int key) {
     return result->val;
 }
 
+/**
+ * Checks if a message with a given identifier exists in the LRU cache.
+ * @param LRUCache Pointer to the LRUCache.
+ * @param key an identifier for the message.
+ *
+ * @return 0 if the message exists in the cache; 1 if not.
+ */
 int LRUCacheFind(LRUCache* cache, int key) {
     node* result;
     HASH_FIND_INT(cache->map, &key, result);

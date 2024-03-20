@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include "LRU.h"
 
-#define LRU_CAPACITY 16
+#define LRU_CAPACITY 1024
 #define RANDOM_MIN 1
 #define RANDOM_MAX 1000
 
@@ -42,7 +42,7 @@ int main() {
         LRUCacheGet(cache, randNumber);
     }
 
-    printf("cache miss: %d, cache hit: %d, ratio: %.2f%% \n", cacheMiss, cacheHit, cacheHit / 1000.0);
+    printf("cache miss: %d, cache hit: %d, ratio: %.2f%% \n", cacheMiss, cacheHit, cacheHit / 1000.0 * 100);
     destroyLRUCache(cache);
 
 
