@@ -9,6 +9,7 @@
 #define LRU_CAPACITY 1024
 #define RANDOM_MIN 1
 #define RANDOM_MAX 1000
+#define TEST_TIMES 1000
 
 int weightedRandomNumber() {
     // give weights to different range
@@ -67,7 +68,7 @@ int main() {
     randomMemory* randMemo = initializeMemory();
 
     LRUCache* cache = initializeLRU(LRU_CAPACITY);
-    for(i = 0; i < 1000; i++) {
+    for(i = 0; i < TEST_TIMES; i++) {
 
         //randNumber = RANDOM_MIN + rand() % RANDOM_MAX;
         randNumber = weightedRandomNumber();
@@ -87,9 +88,9 @@ int main() {
     }
 
     printf("cache miss: %d, cache hit: %d, ratio: %.2f%% \n", cacheMissForLRU, cacheHitForLRU,
-           cacheHitForLRU / 1000.0 * 100);
+           (double) cacheHitForLRU / TEST_TIMES * 100);
     printf("Random Replacement: cache miss: %d, cache hit: %d, ratio: %.2f%% \n", cacheMissForRandom, cacheHitForRandom,
-           cacheHitForRandom / 1000.0 * 100);
+           (double) cacheHitForRandom / TEST_TIMES * 100);
     destroyLRUCache(cache);
     destroyMemory(randMemo);
 
