@@ -3,7 +3,7 @@ all:
 	mkdir disk
 	make run
 compile:
-	gcc node.c message.c LRU.c main.c -o cache
+	gcc randomReplace.c node.c message.c LRU.c main.c -o cache
 run:
 	./cache
 clean:

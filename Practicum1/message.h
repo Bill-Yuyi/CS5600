@@ -2,6 +2,8 @@
 // Created by Yuyi Wang on 3/17/24.
 //
 #include <time.h>
+#ifndef MESSAGE_H
+#define MESSAGE_H
 
 typedef struct{
     int identifier;
@@ -16,3 +18,4 @@ message_t* createMessage(char* sender, char* receiver, char* context);
 int storeMessage(message_t* msg);
 message_t* retrieveMsg(int identifier);
 void destroyMessage(message_t* msg);
+#endif // MESSAGE_H
