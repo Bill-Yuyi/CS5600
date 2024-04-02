@@ -3,7 +3,7 @@
 //
 #include "message.h"
 
-#define MEMORY_SIZE 1024
+#define MEMORY_SIZE 1000
 typedef struct {
     message_t* messageMemory[MEMORY_SIZE];
 }randomMemory;

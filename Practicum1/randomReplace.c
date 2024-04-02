@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include "message.h"
 
-#define MEMORY_SIZE 1024
+#define MEMORY_SIZE 1000
 
 typedef struct {
     message_t* messageMemory[MEMORY_SIZE];
@@ -34,10 +34,10 @@ randomMemory* initializeMemory() {
 int findMessage(randomMemory* memory, int identifier) {
     for(int i = 0;i < MEMORY_SIZE; i++) {
         if(memory->messageMemory[i] != NULL && memory->messageMemory[i]->identifier == identifier) {
-            return 1;
+            return 0;
         }
     }
-    return 0;
+    return 1;
 }
 
 /**
