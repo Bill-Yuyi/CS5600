@@ -12,7 +12,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include "file_io.h"
-
+#include "handle_request.h"
 
 int main(void)
 {
@@ -26,6 +26,7 @@ int main(void)
   char* file_content;
   char* rest;
   char* content;
+  char* msg;
 
   // Clean buffers:
   memset(server_message, '\0', sizeof(server_message));
@@ -52,14 +53,18 @@ int main(void)
   }
   printf("Done with binding\n");
 
+  // Listen for clients:
+  if(listen(socket_desc, 1) < 0){
+        printf("Error while listening\n");
+        close(socket_desc);
+        return -1;
+  }
+  printf("\nListening for incoming connections.....\n");
+
   while(1) {
-      // Listen for clients:
-      if(listen(socket_desc, 1) < 0){
-          printf("Error while listening\n");
-          close(socket_desc);
-          return -1;
-      }
-      printf("\nListening for incoming connections.....\n");
+      // Clean buffers:
+      memset(server_message, '\0', sizeof(server_message));
+      memset(client_message, '\0', sizeof(client_message));
 
       // Accept an incoming connection:
       client_size = sizeof(client_addr);
@@ -83,30 +88,26 @@ int main(void)
           close(client_sock);
           return -1;
       }
-      rest = client_message;
 
+      rest = client_message;
       command = strtok_r(rest, "|", &rest);
-      remote_path = strtok_r(rest, "|", &rest);
+
       if(strcmp(command, "WRITE") == 0) {
-          file_size = atol(strtok_r(rest, "|", &rest));
-          file_content = rest;
-          if(write_file(remote_path, file_content, file_size) == 0) {
-              printf("Content written to %s successfully\n", remote_path);
-          }else {
-              printf("Failed to write content to %s\n", remote_path);
-          }
-          printf("Command from client: %s, %s, %ld, %s\n", command, remote_path, file_size, file_content);
-          strcpy(server_message, "writing file success");
+          remote_path = strtok_r(rest, "|", &rest);
+      }else {
+          remote_path = rest;
+      }
+
+      if(strcmp(command, "WRITE") == 0) {
+          write_request(rest, remote_path,server_message);
       }else if(strcmp(command, "GET") == 0) {
-          printf("%s\n", remote_path);
-          content = read_file(remote_path, &file_size);
-          if(content == NULL) {
-              perror("memory allocation for file content is failed");
-              return 1;
+        get_request(remote_path, file_size,server_message);
+      }else {
+          if(remove(remote_path) == 0) {
+              strcpy(server_message, "File deleted!");
+          }else {
+              perror("Error deleting file");
           }
-          // Respond to client:
-          strcpy(server_message, content);
-          free(content);
       }
 
       if (send(client_sock, server_message, strlen(server_message), 0) < 0){

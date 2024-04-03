@@ -27,7 +27,8 @@ int main(int argc, char* argv[])
   char* rest;
   int message_len;
   if(argc < 3) {
-      printf("Usage: %s WRITE|GET|RM local-file-path remote-file-path\n", argv[0]);
+      printf("Usage: %s WRITE|GET|RM local-file-path remote-file-path\n GET remote-file-path (local-file-path)\n "
+             "RM remote-file-path", argv[0]);
       return 1;
   }
 
@@ -69,6 +70,16 @@ int main(int argc, char* argv[])
 
       local_path = (argc == 3) ? file_name : argv[3];
 
+      message_len = strlen(command) + strlen(remote_path) + 20;
+      client_message = malloc(message_len);
+      if(client_message == NULL) {
+          perror("Memory allocation for server message is failed");
+          return 1;
+      }
+      snprintf(client_message, message_len,"%s|%s", command, remote_path);
+  }
+  else {
+      remote_path = argv[2];
       message_len = strlen(command) + strlen(remote_path) + 20;
       client_message = malloc(message_len);
       if(client_message == NULL) {
