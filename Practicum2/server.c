@@ -11,24 +11,8 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include "file_io.h"
 
-int write_file(const char* file_path, const char* content, size_t size) {
-    FILE* file = fopen(file_path, "wb");
-    if(!file) {
-        perror("Error opening file for writing");
-        return 1;
-    }
-
-    size_t written = fwrite(content, 1, size, file);
-    if(written != size) {
-        perror("Error writing content");
-        fclose(file);
-        return -1;
-    }
-
-    fclose(file);
-    return 0;
-}
 
 int main(void)
 {
@@ -41,6 +25,7 @@ int main(void)
   long file_size;
   char* file_content;
   char* rest;
+  char* content;
 
   // Clean buffers:
   memset(server_message, '\0', sizeof(server_message));
@@ -102,17 +87,27 @@ int main(void)
 
       command = strtok_r(rest, "|", &rest);
       remote_path = strtok_r(rest, "|", &rest);
-      file_size = atol(strtok_r(rest, "|", &rest));
-      file_content = rest;
-      if(write_file(remote_path, file_content, file_size) == 0) {
-          printf("Content written to %s successfully\n", remote_path);
-      }else {
-          printf("Failed to write content to %s\n", remote_path);
+      if(strcmp(command, "WRITE") == 0) {
+          file_size = atol(strtok_r(rest, "|", &rest));
+          file_content = rest;
+          if(write_file(remote_path, file_content, file_size) == 0) {
+              printf("Content written to %s successfully\n", remote_path);
+          }else {
+              printf("Failed to write content to %s\n", remote_path);
+          }
+          printf("Command from client: %s, %s, %ld, %s\n", command, remote_path, file_size, file_content);
+          strcpy(server_message, "writing file success");
+      }else if(strcmp(command, "GET") == 0) {
+          printf("%s\n", remote_path);
+          content = read_file(remote_path, &file_size);
+          if(content == NULL) {
+              perror("memory allocation for file content is failed");
+              return 1;
+          }
+          // Respond to client:
+          strcpy(server_message, content);
+          free(content);
       }
-      printf("Command from client: %s, %s, %ld, %s\n", command, remote_path, file_size, file_content);
-
-      // Respond to client:
-      strcpy(server_message, "This is the server's response message.");
 
       if (send(client_sock, server_message, strlen(server_message), 0) < 0){
           printf("Can't send\n");
