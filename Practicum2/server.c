@@ -13,27 +13,65 @@
 #include <unistd.h>
 #include "file_io.h"
 #include "handle_request.h"
+#include <pthread.h>
+#include "global_mutex.h"
+
+#define MAX_CLIENTS 100
+
+void* request_handler(void *socket_desc) {
+    int read_size, sock = *(int *) socket_desc;
+    char server_message[8196], client_message[8196];
+    char *command;
+    char *remote_path;
+    long file_size;
+    char *rest;
+    // Clean buffers:
+    memset(server_message, '\0', sizeof(server_message));
+    memset(client_message, '\0', sizeof(client_message));
+    if ((read_size = recv(sock, client_message, sizeof(client_message), 0)) > 0) {
+        rest = client_message;
+        command = strtok_r(rest, "|", &rest);
+
+        if (strcmp(command, "WRITE") == 0) {
+            remote_path = strtok_r(rest, "|", &rest);
+        } else {
+            remote_path = rest;
+        }
+
+        if (strcmp(command, "WRITE") == 0) {
+            write_request(rest, remote_path, server_message);
+        } else if (strcmp(command, "GET") == 0) {
+            get_request(remote_path, file_size, server_message);
+        } else {
+            remove_request(remote_path, server_message);
+        }
+
+        send(sock, server_message, strlen(server_message), 0);
+    }
+    if(read_size == 0) {
+        puts("Client disconnected");
+        fflush(stdout);
+    } else if(read_size == -1) {
+        perror("recv failed");
+    }
+
+    // Free the socket pointer
+    close(sock);
+    free(socket_desc);
+
+    return 0;
+
+}
 
 int main(void)
 {
-  int socket_desc, client_sock;
-  socklen_t client_size;
-  struct sockaddr_in server_addr, client_addr;
-  char server_message[8196], client_message[8196];
-  char* command;
-  char* remote_path;
-  long file_size;
-  char* file_content;
-  char* rest;
-  char* content;
-  char* msg;
+    initialize_mutex();
+    int socket_desc, client_sock, *new_sock;
+    struct sockaddr_in server_addr, client_addr;
+    socklen_t client_size = sizeof(client_addr);
 
-  // Clean buffers:
-  memset(server_message, '\0', sizeof(server_message));
-  memset(client_message, '\0', sizeof(client_message));
-  
-  // Create socket:
-  socket_desc = socket(AF_INET, SOCK_STREAM, 0);
+    // Create socket:
+    socket_desc = socket(AF_INET, SOCK_STREAM, 0);
   
   if(socket_desc < 0){
     printf("Error while creating socket\n");
@@ -54,74 +92,32 @@ int main(void)
   printf("Done with binding\n");
 
   // Listen for clients:
-  if(listen(socket_desc, 1) < 0){
+  if(listen(socket_desc, MAX_CLIENTS) < 0){
         printf("Error while listening\n");
         close(socket_desc);
         return -1;
   }
   printf("\nListening for incoming connections.....\n");
 
-  while(1) {
-      // Clean buffers:
-      memset(server_message, '\0', sizeof(server_message));
-      memset(client_message, '\0', sizeof(client_message));
+    while ((client_sock = accept(socket_desc, (struct sockaddr *)&client_addr, &client_size))) {
+        printf("Connection accepted from %s:%d\n", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
 
-      // Accept an incoming connection:
-      client_size = sizeof(client_addr);
-      client_sock = accept(socket_desc, (struct sockaddr*)&client_addr, &client_size);
+        pthread_t sniffer_thread;
+        new_sock = malloc(1);
+        *new_sock = client_sock;
 
-      if (client_sock < 0){
-          printf("Can't accept\n");
-          close(socket_desc);
-          close(client_sock);
-          return -1;
-      }
-      printf("Client connected at IP: %s and port: %i\n",
-             inet_ntoa(client_addr.sin_addr),
-             ntohs(client_addr.sin_port));
+        if (pthread_create(&sniffer_thread, NULL, request_handler, (void*) new_sock) < 0) {
+            perror("could not create thread");
+            return 1;
+        }
 
-      // Receive client's message:
-      if (recv(client_sock, client_message,
-               sizeof(client_message), 0) < 0){
-          printf("Couldn't receive\n");
-          close(socket_desc);
-          close(client_sock);
-          return -1;
-      }
-
-      rest = client_message;
-      command = strtok_r(rest, "|", &rest);
-
-      if(strcmp(command, "WRITE") == 0) {
-          remote_path = strtok_r(rest, "|", &rest);
-      }else {
-          remote_path = rest;
-      }
-
-      if(strcmp(command, "WRITE") == 0) {
-          write_request(rest, remote_path,server_message);
-      }else if(strcmp(command, "GET") == 0) {
-        get_request(remote_path, file_size,server_message);
-      }else {
-          if(remove(remote_path) == 0) {
-              strcpy(server_message, "File deleted!");
-          }else {
-              perror("Error deleting file");
-          }
-      }
-
-      if (send(client_sock, server_message, strlen(server_message), 0) < 0){
-          printf("Can't send\n");
-          close(socket_desc);
-          close(client_sock);
-          return -1;
-      }
-  }
-
+        // Now join the thread, so that we don't terminate before the thread
+        // pthread_join(sniffer_thread, NULL);
+    }
   
   // Closing the socket:
   close(client_sock);
   close(socket_desc);
-  
+  destroy_mutex();
   return 0;
 }
