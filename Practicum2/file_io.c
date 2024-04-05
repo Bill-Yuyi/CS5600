@@ -48,7 +48,15 @@ int write_file(const char* file_path, const char* content, size_t size) {
         fclose(file);
         return -1;
     }
-
     fclose(file);
     return 0;
 }
+
+void set_permission(const char* remote_path, const char* permission) {
+    char meta_path[1024];
+    snprintf(meta_path, sizeof(meta_path), "%s.meta", remote_path);
+    FILE* meta_file = fopen(meta_path, "w");
+    fprintf(meta_file, "%s\n", permission);
+    fclose(meta_file);
+}
+

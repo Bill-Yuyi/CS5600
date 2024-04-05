@@ -11,7 +11,6 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <unistd.h>
-#include <pthread.h>
 #include "file_io.h"
 
 
@@ -26,9 +25,10 @@ int main(int argc, char* argv[])
   char* remote_path;
   char* local_path;
   char* rest;
+  char* permission;
   int message_len;
   if(argc < 3) {
-      printf("Usage: %s WRITE|GET|RM local-file-path remote-file-path\n GET remote-file-path (local-file-path)\n "
+      printf("Usage: %s WRITE local-file-path remote-file-path \n GET remote-file-path (local-file-path)\n "
              "RM remote-file-path", argv[0]);
       return 1;
   }
@@ -40,26 +40,60 @@ int main(int argc, char* argv[])
 
 
   // read local file
-  if(strcmp(command, "WRITE") == 0) {
-      local_path = argv[2];
-      remote_path = argc == 3 ? argv[2] : argv[3];
-      content = read_file(local_path, &file_size);
-      if(content == NULL) {
-          perror("memory allocation for file content is failed");
-          return 1;
-      }
+    if(strcmp(command, "WRITE") == 0) {
+        local_path = argv[2];
+        permission = NULL; // Initialize permission as NULL
 
-      message_len = strlen(command) + strlen(remote_path) + file_size + 20; // 20 extra bytes for separators and null terminator
-      client_message = malloc(message_len);
-      if(client_message == NULL) {
-          free(content);
-          perror("Memory allocation for server message is failed");
-          return 1;
-      }
-      snprintf(client_message, message_len,"%s|%s|%ld|%s", command, remote_path, file_size, content);
-      free(content);
-  }
-  else if(strcmp(command, "GET") == 0) {
+        // If there are 5 arguments, the fourth is the remote path, and the fifth is the permission
+        if(argc == 5) {
+            remote_path = argv[3];
+            permission = argv[4];
+        } else if (argc == 4) { // If there are 4 arguments, the third could be either remote path or permission
+            // Check if the third argument is "0" or "1", which means it's a permission
+            if(strcmp(argv[3], "0") == 0 || strcmp(argv[3], "1") == 0) {
+                permission = argv[3];
+                remote_path = argv[2]; // Remote path defaults to local path if only permission is provided
+            } else {
+                remote_path = argv[3]; // If it's not a permission, treat it as a remote path
+            }
+        } else {
+            remote_path = argv[2]; // Default to local path if no additional arguments are provided
+        }
+
+        if(permission != NULL && (strcmp(permission, "0") != 0 && strcmp(permission, "1") != 0)) {
+            printf("Invalid permission. Usage: %s WRITE local-file-path remote-file-path [permission 0 or 1]\n", argv[0]);
+            return 1;
+        }
+
+        content = read_file(local_path, &file_size);
+        if(content == NULL) {
+            perror("Memory allocation for file content failed");
+            return 1;
+        }
+
+        // Calculate message length more accurately
+        message_len = strlen(command) + strlen(remote_path) + strlen(content) + 40; // Adding extra space for delimiters, file size, and null terminator
+        if (permission != NULL) {
+            message_len += strlen(permission);
+        }
+
+        client_message = malloc(message_len);
+        if(client_message == NULL) {
+            free(content);
+            perror("Memory allocation for client message failed");
+            return 1;
+        }
+
+        if(permission != NULL) {
+            snprintf(client_message, message_len, "%s|%s|%ld|%s|%s", command, remote_path, file_size, content, permission);
+        } else {
+            snprintf(client_message, message_len, "%s|%s|%ld|%s", command, remote_path, file_size, content);
+        }
+
+        free(content); // Ensure content is freed after use
+    }
+
+    else if(strcmp(command, "GET") == 0) {
       remote_path = argv[2];
 
       char* file_name = strrchr(remote_path, '/');
@@ -105,7 +139,7 @@ int main(int argc, char* argv[])
   // Set port and IP the same as server-side:
   server_addr.sin_family = AF_INET;
   server_addr.sin_port = htons(2000);
-  server_addr.sin_addr.s_addr = inet_addr("192.168.0.126");
+  server_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
   
   // Send connection request to server:
   if(connect(socket_desc, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0){

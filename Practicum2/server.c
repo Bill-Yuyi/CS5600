@@ -39,7 +39,13 @@ void* request_handler(void *socket_desc) {
         }
 
         if (strcmp(command, "WRITE") == 0) {
-            write_request(rest, remote_path, server_message);
+            int permission = is_writable(remote_path);
+            if(permission != 2) {
+                write_request(rest, remote_path, server_message);
+            } else {
+                write_request_with_permission(rest, remote_path,server_message);
+            }
+
         } else if (strcmp(command, "GET") == 0) {
             get_request(remote_path, file_size, server_message);
         } else {
