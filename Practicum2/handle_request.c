@@ -55,9 +55,6 @@ void write_request_with_permission(char* rest, char* remote_path,char server_mes
     long file_size = atol(strtok_r(rest, "|", &rest));
     char* file_content = strtok_r(rest, "|", &rest);
     char* permission_set = rest;
-    if(permission_set == NULL) {
-        permission_set = "1";
-    }
     if(write_file(remote_path, file_content, file_size) == 0) {
         set_permission(remote_path, permission_set);
         printf("Content written to %s successfully\n", remote_path);
