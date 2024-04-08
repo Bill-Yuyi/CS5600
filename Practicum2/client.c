@@ -190,7 +190,7 @@ int main(int argc, char* argv[])
     }
 
     if(strcmp(command, "GET") == 0) {
-        printf("%d\n", strcmp(server_message, "No such file"));
+
         if(strcmp(server_message, "No such file") != 0) {
             if(write_file_without_encode(local_path, server_message, strlen(server_message)) == 0) {
                 printf("Content written to %s successfully\n", local_path);
@@ -200,7 +200,7 @@ int main(int argc, char* argv[])
         }
     }
 
-    printf("Server's response: %s\n",server_message);
+    //printf("Server's response: %s\n",server_message);
 
     // Close the socket:
     close(socket_desc);
