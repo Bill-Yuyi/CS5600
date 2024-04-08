@@ -51,8 +51,11 @@ void* request_handler(void *socket_desc) {
             get_request(remote_path, file_size, server_message);
         } else if(strcmp(command, "RM") == 0){
             remove_request(remote_path, server_message);
-        }else {
+        }else if(strcmp(command, "LS") == 0){
             permission_check_request(remote_path,server_message);
+        }else {
+            close(sock);
+            exit(0);
         }
         send(sock, server_message, strlen(server_message), 0);
     }

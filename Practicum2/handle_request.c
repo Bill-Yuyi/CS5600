@@ -103,6 +103,7 @@ void get_request(char* remote_path, long file_size,char server_message[]) {
     char* content = read_file(remote_path, &file_size);
     if(content == NULL) {
         strcpy(server_message, "No such file");
+        server_message[strlen(server_message)] = '\0';
     }else {
         strcpy(server_message, content);
         free(content);
@@ -124,7 +125,10 @@ void remove_request(char* remote_path, char server_message[]) {
         return;
     }
 
-    if (remove(remote_path) == 0) {
+    char meta_path[1024];
+    snprintf(meta_path, sizeof(meta_path), "%s.meta", remote_path);
+
+    if (remove(remote_path) == 0 && remove(meta_path) == 0) {
         strcpy(server_message, "File deleted!");
     } else {
         strcpy(server_message, "Error deleting file!");
@@ -150,3 +154,4 @@ void permission_check_request(char* remote_path, char server_message[]) {
     }
     pthread_mutex_unlock(&file_operation_mutex);
 }
+

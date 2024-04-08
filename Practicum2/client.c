@@ -27,10 +27,14 @@ int main(int argc, char* argv[])
     char* rest;
     char* permission;
     int message_len;
+    int get_request_status;
+
     if(argc < 3) {
-        printf("Usage: %s WRITE local-file-path remote-file-path \n GET remote-file-path (local-file-path)\n "
-               "RM remote-file-path", argv[0]);
-        return 1;
+        if(argc != 2 || strcmp(argv[1], "STOP") == 1) {
+            printf("Usage: %s WRITE local-file-path remote-file-path \n GET remote-file-path (local-file-path)\n "
+                   "RM remote-file-path", argv[0]);
+            return 1;
+        }
     }
 
     // Clean buffers:
@@ -40,7 +44,18 @@ int main(int argc, char* argv[])
 
 
     // read local file
-    if(strcmp(command, "WRITE") == 0) {
+    if(strcmp(command, "STOP") == 0) {
+        message_len = strlen(command) + 20;
+
+        client_message = malloc(message_len);
+        if(client_message == NULL) {
+            perror("Memory allocation for client message failed");
+            return 1;
+        }
+
+        snprintf(client_message, message_len, "%s", command);
+    }
+    else if(strcmp(command, "WRITE") == 0) {
         local_path = argv[2];
         permission = NULL; // Initialize permission as NULL
 
@@ -175,10 +190,13 @@ int main(int argc, char* argv[])
     }
 
     if(strcmp(command, "GET") == 0) {
-        if(write_file_without_encode(local_path, server_message, strlen(server_message)) == 0) {
-            printf("Content written to %s successfully\n", local_path);
-        }else {
-            printf("Failed to write content to %s\n", local_path);
+        printf("%d\n", strcmp(server_message, "No such file"));
+        if(strcmp(server_message, "No such file") != 0) {
+            if(write_file_without_encode(local_path, server_message, strlen(server_message)) == 0) {
+                printf("Content written to %s successfully\n", local_path);
+            }else {
+                printf("Failed to write content to %s\n", local_path);
+            }
         }
     }
 
