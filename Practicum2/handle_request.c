@@ -7,6 +7,12 @@
 #include <stdlib.h>
 #include "global_mutex.h"
 
+/**
+ * Checks if a file is writable based on its metadata.
+ *
+ * @param filename The name of the file to check.
+ * @return Returns 1 if the file is writable, 0 if not writable, and 2 if it is a new file.
+ */
 int is_writable(const char* filename) {
     char meta_path[1024];
     snprintf(meta_path, sizeof(meta_path), "%s.meta", filename);
@@ -24,6 +30,13 @@ int is_writable(const char* filename) {
     }
 }
 
+/**
+ * Handles a write request to a file, including checking write permissions.
+ *
+ * @param rest Pointer to the rest of the request message containing file content.
+ * @param remote_path Path to the file on the server.
+ * @param server_message Buffer to store the response message to the client.
+ */
 void write_request(char* rest, char* remote_path,char server_message[]) {
     pthread_mutex_lock(&file_operation_mutex);
 
@@ -49,6 +62,13 @@ void write_request(char* rest, char* remote_path,char server_message[]) {
     pthread_mutex_unlock(&file_operation_mutex);
 }
 
+/**
+ * Handles a write request with specified permissions for new files.
+ *
+ * @param rest Pointer to the rest of the request message containing file content and permissions.
+ * @param remote_path Path to the file on the server.
+ * @param server_message Buffer to store the response message to the client.
+ */
 void write_request_with_permission(char* rest, char* remote_path,char server_message[]) {
     pthread_mutex_lock(&file_operation_mutex);
 
@@ -70,6 +90,13 @@ void write_request_with_permission(char* rest, char* remote_path,char server_mes
     pthread_mutex_unlock(&file_operation_mutex);
 }
 
+/**
+ * Handles a request to retrieve a file.
+ *
+ * @param remote_path Path to the file on the server.
+ * @param file_size Size of the file to be sent to the client.
+ * @param server_message Buffer to store the file content or error message.
+ */
 void get_request(char* remote_path, long file_size,char server_message[]) {
     pthread_mutex_lock(&file_operation_mutex);
 
@@ -83,6 +110,12 @@ void get_request(char* remote_path, long file_size,char server_message[]) {
     pthread_mutex_unlock(&file_operation_mutex);
 }
 
+/**
+ * Handles a request to delete a file, including permission checks.
+ *
+ * @param remote_path Path to the file on the server.
+ * @param server_message Buffer to store the result of the delete operation.
+ */
 void remove_request(char* remote_path, char server_message[]) {
     pthread_mutex_lock(&file_operation_mutex);
     if(is_writable(remote_path) == 0) {
@@ -99,3 +132,21 @@ void remove_request(char* remote_path, char server_message[]) {
     pthread_mutex_unlock(&file_operation_mutex);
 }
 
+/**
+ * Checks and reports the permission status of a file.
+ *
+ * @param remote_path Path to the file on the server.
+ * @param server_message Buffer to store the file permission status.
+ */
+void permission_check_request(char* remote_path, char server_message[]) {
+    pthread_mutex_lock(&file_operation_mutex);
+    int permission = is_writable(remote_path);
+    if(permission == 0) {
+        strcpy(server_message, "The file is read only\n");
+    }else if(permission == 1) {
+        strcpy(server_message, "The file is read-write\n");
+    }else {
+        strcpy(server_message, "There is no such file\n");
+    }
+    pthread_mutex_unlock(&file_operation_mutex);
+}
